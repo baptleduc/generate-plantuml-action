@@ -80,7 +80,7 @@ function puFromMd(markdown) {
 }
 
 export async function getCommitsFromPayload(octokit, payload) {
-    const commits = payload.commits;
+    const commits = payload.commits ?? [];
     const owner   = payload.repository.owner.login;
     const repo    = payload.repository.name;
 
