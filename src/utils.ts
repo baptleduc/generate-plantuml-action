@@ -80,10 +80,19 @@ function puFromMd(markdown) {
 }
 
 export async function getCommitsFromPayload(octokit, payload) {
-    const commits = payload.commits ?? [];
-    const owner   = payload.repository.owner.login;
-    const repo    = payload.repository.name;
+    const owner = payload.repository.owner.login;
+    const repo  = payload.repository.name;
 
+    if (payload.pull_request) {
+        const res = await octokit.pulls.listFiles({
+            owner, repo,
+            pull_number: payload.pull_request.number,
+            per_page: 100,
+        });
+        return [{ files: (<any>res).data }];
+    }
+
+    const commits = payload.commits ?? [];
     const res = await Promise.all(commits.map(commit => octokit.repos.getCommit({
         owner, repo, ref: commit.id
     })));

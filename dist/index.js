@@ -32579,9 +32579,17 @@ function puFromMd(markdown) {
 function getCommitsFromPayload(octokit, payload) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const commits = (_a = payload.commits) !== null && _a !== void 0 ? _a : [];
         const owner = payload.repository.owner.login;
         const repo = payload.repository.name;
+        if (payload.pull_request) {
+            const res = yield octokit.pulls.listFiles({
+                owner, repo,
+                pull_number: payload.pull_request.number,
+                per_page: 100,
+            });
+            return [{ files: res.data }];
+        }
+        const commits = (_a = payload.commits) !== null && _a !== void 0 ? _a : [];
         const res = yield Promise.all(commits.map(commit => octokit.repos.getCommit({
             owner, repo, ref: commit.id
         })));
